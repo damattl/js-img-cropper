@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <title>Cropper</title>
+  </head>
+  <body>
+    <div id="app">
+        <div class="container">
+            <canvas width="500px" height="500px" id="crop-canvas"></canvas>
+            <div class="controls">
+                <div>
+                    <label for="upload">Bild hochladen</label>
+                    <input id="upload" accept="image/*" style="display:none;" type="file">
+                </div>
+                <button id="save">Speichern</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
