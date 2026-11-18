@@ -7,6 +7,11 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
+    "paths": {
+          "js-img-cropper": ["./lib/index.ts"],
+          "js-img-cropper/utils": ["./lib/utils.ts"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -20,5 +25,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "lib"]
 }

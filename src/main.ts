@@ -1,7 +1,6 @@
 import './style.css'
-import './crop.ts'
-import { initCroppingTool } from './crop.ts';
-import { download } from './utils.ts';
+import { ImageCropper} from 'js-img-cropper';
+import { download } from 'js-img-cropper/utils';
 
 document.addEventListener("gesturestart", function (e) {
 	e.preventDefault();
@@ -28,16 +27,27 @@ window.addEventListener('touchstart', function(e) {
 
 // TODO: Update example to look better
 
-initCroppingTool((blob, clear) => {
+const canvas = document.getElementById("crop-canvas") as HTMLCanvasElement;
+const cropper = new ImageCropper(canvas)
+
+
+
+const saveButton = document.getElementById("save") as HTMLButtonElement
+saveButton.addEventListener("click", async () => {
+    const blob = await cropper.save()
     const url = window.URL.createObjectURL(blob)
     download(url)
-    clear()
-}, (start, done) => {
-    const upload = document.getElementById("upload") as HTMLInputElement;
-    if (start) {
-        upload.labels[0].innerText = "Loading..."
-    }
-    if (done) {
-        upload.labels[0].innerText = "Bild hochladen"
+})
+
+const uploadForm = document.querySelector(`input#upload`) as HTMLInputElement
+
+uploadForm.addEventListener("change", async () => {
+    if (uploadForm.files.length === 1) {
+        console.log("File selected: ", uploadForm.files[0]);
+        const file = uploadForm.files[0]
+
+        uploadForm.labels[0].innerText = "Loading..."
+        await cropper.load(file)
+        uploadForm.labels[0].innerText = "Bild hochladen"
     }
 })

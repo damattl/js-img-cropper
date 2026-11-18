@@ -127,7 +127,7 @@ class ImageContext {
         this.image = image;
 
         this.canvas = canvas;
-        this.ctx = this.canvas.getContext("2d")
+        this.ctx = this.canvas.getContext("2d")!
     }
 
     public get scale() {
@@ -166,7 +166,7 @@ class ImageContext {
         console.log("Destroy called")
         console.debug("Destroy called")
         this.ctx.reset();
-        this.image.src = null;
+        this.image.src = "";
     }
 
     public redraw() {
@@ -306,75 +306,66 @@ function initDrag(canvas: HTMLCanvasElement, image: HTMLImageElement): [context:
 }
 
 
-interface CroppingToolOptions {
-    canvasId?: string
-    saveButtonId?: string
-    uploadInputId?: string
+interface SaveImageOptions {
     image: {
         format?: string
         quality?: number
     }
 }
 
-const CroppingToolOptionDefaults: CroppingToolOptions = {
-    image: {
-        format: "jpeg",
-        quality: 0.95,
-    },
-    canvasId: "crop-canvas",
-    saveButtonId: "save",
-    uploadInputId: "upload"
-}
+export class ImageCropper {
+    private canvas: HTMLCanvasElement
 
-export function initCroppingTool(
-    onSave: (blob: Blob, clear: () => void) => void,
-    onLoading?: (start: boolean, done: boolean) => void,
-    options: CroppingToolOptions = CroppingToolOptionDefaults
-) {
-    // TODO: Ensure valid defaults
-    let canvas = document.getElementById(options.canvasId) as HTMLCanvasElement;
+    private controller: AbortController | undefined | null = null;
+    private context: ImageContext | undefined | null = null;
 
-    let controller: AbortController | undefined | null = null;
-    let context: ImageContext | undefined | null = null;
+    constructor(canvas: HTMLCanvasElement) {
+        this.canvas = canvas
+    }
 
-    const saveButton = document.getElementById(options.saveButtonId) as HTMLButtonElement
-    saveButton.addEventListener("click", () => {
-        canvas.toBlob((blob) => {
-            onSave(blob, () => {
-                controller?.abort();
-                context?.destroy();
-                controller = null;
-                context = null;
-            })
-        }, `image/${options.image.format}`, options.image.quality)
-    })
-
-    const uploadForm = document.querySelector(`input#${options.uploadInputId}`) as HTMLInputElement
-    uploadForm.addEventListener("change", async () => {
-        if (uploadForm.files.length === 1) {
-            console.log("File selected: ", uploadForm.files[0]);
-            const file = uploadForm.files[0]
-
-            const promise = loadImage(URL.createObjectURL(file));
-            onLoading(true, false)
-            const img = await promise;
-            onLoading(false, true) // TODO: Use promise
-
-            if (controller) {
-                console.log("Clearing existing controller")
-                controller?.abort("New image selected")
-                controller = null;
-                context?.destroy();
-                context = null;
-            }
-
-            const res = initDrag(canvas, img)
-            context = res[0]
-            controller = res[1]
-
-            console.log("Init done!")
-
+    public save({ image }: SaveImageOptions = {
+        image: {
+            format: "jpeg",
+            quality: 0.95,
         }
-    })
+    },): Promise<Blob> {
+        const promise = new Promise<Blob>((resolve, reject) => {
+            this.canvas.toBlob((blob) => {
+                this.controller?.abort();
+                this.context?.destroy();
+                this.controller = null;
+                this.context = null;
 
+                if (blob == null) {
+                    reject(EMPTY_BLOB)
+                    return
+                }
+
+                resolve(blob)
+            }, `image/${image.format}`, image.quality)
+        });
+
+        // TODO: Handle reject and error, etc.
+        return promise
+    }
+
+    public async load(file: File) {
+        const img = await loadImage(URL.createObjectURL(file));
+
+        if (this.controller) {
+            console.debug("Clearing existing controller")
+            this.controller?.abort("New image selected")
+            this.controller = null;
+            this.context?.destroy();
+            this.context = null;
+        }
+
+        [this.context, this.controller] = initDrag(this.canvas, img)
+
+        console.debug("Init done!")
+        return true;
+    }
 }
+
+
+const EMPTY_BLOB = "EMPTY_BLOB"
