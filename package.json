@@ -1,7 +1,7 @@
 {
   "name": "js-img-cropper",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist"
@@ -10,16 +10,16 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      },
-      "./utils": {
-        "types": "./dist/utils.d.ts",
-        "import": "./dist/utils.js",
-        "require": "./dist/utils.cjs"
-      }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    }
   },
   "scripts": {
     "dev": "vite",
